@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>QR Studio Premium</title>
+  
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f1f1b 0%, #1a332b 100%);
+      color: #eafff7;
+      min-height: 100vh;
+    }
+    
+    .hidden { display: none !important; }
+    
+    /* ===== AKTIVASI SCREEN ===== */
+    #activation {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .activation-box {
+      background: rgba(19, 45, 38, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 40px 30px;
+      border-radius: 30px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+      border: 1px solid rgba(42, 245, 152, 0.3);
+      animation: slideUp 0.5s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .lock-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #2af598, #009efd);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px;
+      font-size: 50px;
+      box-shadow: 0 15px 30px rgba(42, 245, 152, 0.3);
+    }
+    
+    .activation-box h3 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #2af598, #009efd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .activation-box p {
+      color: #8fbfb3;
+      margin-bottom: 25px;
+    }
+    
+    .activation-box input {
+      width: 100%;
+      padding: 18px;
+      border-radius: 20px;
+      border: 2px solid #1f463b;
+      background: #0f1f1b;
+      color: #fff;
+      font-size: 24px;
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .activation-box input:focus {
+      outline: none;
+      border-color: #2af598;
+      box-shadow: 0 0 0 4px rgba(42, 245, 152, 0.2);
+    }
+    
+    .activation-box button {
+      width: 100%;
+      padding: 18px;
+      border-radius: 20px;
+      border: none;
+      background: linear-gradient(135deg, #2af598, #009efd);
+      color: #003b2f;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 15px;
+    }
+    
+    .activation-box button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(42, 245, 152, 0.4);
+    }
+    
+    #keyMsg {
+      font-size: 14px;
+      min-height: 20px;
+    }
+    
+    /* ===== APP SCREEN ===== */
+    #app {
+      max-width: 500px;
+      margin: 0 auto;
+      padding-bottom: 30px;
+    }
+    
+    header {
+      padding: 20px;
+      background: linear-gradient(135deg, #2af598, #009efd);
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #003b2f;
+      border-bottom-left-radius: 30px;
+      border-bottom-right-radius: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .container {
+      padding: 20px;
+    }
+    
+    /* Tabs Navigation */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: #132d26;
+      padding: 8px;
+      border-radius: 30px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 14px;
+      background: transparent;
+      border-radius: 25px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: #8fbfb3;
+      transition: all 0.3s;
+    }
+    
+    .tab.active {
+      background: linear-gradient(135deg, #2af598, #009efd);
+      color: #003b2f;
+      box-shadow: 0 5px 15px rgba(42, 245, 152, 0.3);
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Cards */
+    .card {
+      background: #132d26;
+      border-radius: 30px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #1f463b;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #2af598;
+    }
+    
+    .card-title span {
+      font-size: 24px;
+    }
+    
+    /* Form Elements */
+    input, textarea, select {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 15px;
+      border-radius: 20px;
+      border: 2px solid #1f463b;
+      background: #0f1f1b;
+      color: #fff;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #2af598;
+      box-shadow: 0 0 0 4px rgba(42, 245, 152, 0.2);
+    }
+    
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232af598' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+    }
+    
+    /* Checkbox Style */
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #8fbfb3;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+    
+    .checkbox-label input {
+      width: auto;
+      margin-bottom: 0;
+    }
+    
+    /* QR Box */
+    .qr-box {
+      margin: 20px 0;
+      padding: 30px;
+      border: 2px dashed #2af598;
+      border-radius: 30px;
+      text-align: center;
+      background: #0f1f1b;
+    }
+    
+    #qrcode {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    #qrcode img {
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .qr-box p {
+      color: #8fbfb3;
+      font-size: 14px;
+    }
+    
+    /* Buttons */
+    button {
+      padding: 18px;
+      width: 100%;
+      border-radius: 25px;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, #2af598, #009efd);
+      color: #003b2f;
+      margin-top: 10px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(42, 245, 152, 0.4);
+    }
+    
+    button.secondary {
+      background: transparent;
+      border: 2px solid #2af598;
+      color: #2af598;
+    }
+    
+    button.secondary:hover {
+      background: rgba(42, 245, 152, 0.1);
+    }
+    
+    /* Menu Grid untuk Kontak dan Lainnya */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .menu-card {
+      background: #0f1f1b;
+      border-radius: 25px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    
+    .menu-card:hover {
+      border-color: #2af598;
+      transform: translateY(-3px);
+    }
+    
+    .menu-card.active {
+      border-color: #2af598;
+      background: linear-gradient(135deg, rgba(42, 245, 152, 0.1), rgba(0, 158, 253, 0.1));
+    }
+    
+    .menu-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+    
+    .menu-card h4 {
+      margin-bottom: 5px;
+      color: #fff;
+    }
+    
+    .menu-card p {
+      font-size: 12px;
+      color: #8fbfb3;
+    }
+    
+    /* History List */
+    .history-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-bottom: 1px solid #1f463b;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .history-item:hover {
+      background: #1a332b;
+      border-radius: 15px;
+    }
+    
+    .history-icon {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #2af59820, #009efd20);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .history-info {
+      flex: 1;
+    }
+    
+    .history-info h4 {
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+    
+    .history-info p {
+      font-size: 11px;
+      color: #8fbfb3;
+    }
+    
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #132d26;
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: 14px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+      border: 1px solid #2af598;
+      z-index: 1000;
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .toast.show {
+      display: block;
+    }
+    
+    .toast.success {
+      border-color: #2af598;
+    }
+    
+    .toast.error {
+      border-color: #ff4d4d;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      background: #132d26;
+      padding: 15px;
+      border-radius: 30px;
+      margin-top: 20px;
+    }
+    
+    .nav-item {
+      text-align: center;
+      color: #8fbfb3;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .nav-item.active {
+      color: #2af598;
+    }
+    
+    .nav-item span:first-child {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .nav-item span:last-child {
+      font-size: 12px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 400px) {
+      .menu-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-wrap: wrap;
+      }
+      
+      .tab {
+        padding: 12px 8px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===== AKTIVASI SCREEN ===== -->
+<div id="activation">
+  <div class="activation-box">
+    <div class="lock-icon">🔒</div>
+    <h3>QR STUDIO PREMIUM</h3>
+    <p>APLIKASI INI DILINDUNGI<br>Masukkan Key Aktivasi</p>
+    
+    <input type="password" id="keyInput" placeholder="KEY: *******" maxlength="10" onkeydown="if(event.key==='Enter')checkKey()" autofocus>
+    
+    <button onclick="checkKey()">AKTIVASI</button>
+    
+    <p id="keyMsg" style="color: #ff4d4d;"></p>
+    <p style="color: #8fbfb3; font-size: 12px; margin-top: 15px;">Masukkan key dengan benar!</p>
+  </div>
+</div>
+
+<!-- ===== APP SCREEN ===== -->
+<div id="app" class="hidden">
+  <header>QR Studio Premium</header>
+
+  <div class="container">
+    <!-- Main Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchMainTab('generate', this)">Generate</div>
+      <div class="tab" onclick="switchMainTab('history', this)">History</div>
+      <div class="tab" onclick="switchMainTab('about', this)">About</div>
+    </div>
+    
+    <!-- Generate Tab Content -->
+    <div id="generateTab" class="tab-content active">
+      <!-- Content Type Tabs -->
+      <div class="tabs" style="margin-bottom: 20px;">
+        <div class="tab active" onclick="switchContentTab('text', this)">📝 Teks</div>
+        <div class="tab" onclick="switchContentTab('url', this)">🌐 URL</div>
+        <div class="tab" onclick="switchContentTab('wifi', this)">📶 WiFi</div>
+        <div class="tab" onclick="switchContentTab('kontak', this)">👤 Kontak</div>
+      </div>
+      
+      <!-- Content Area -->
+      <div class="card">
+        <div id="contentTitle" class="card-title">
+          <span>📝</span> QR UNTUK TEKS
+        </div>
+        
+        <div id="inputArea"></div>
+        
+        <!-- QR Preview Box -->
+        <div class="qr-box">
+          <div id="qrcode"></div>
+          <p>Preview QR Code akan muncul di sini</p>
+        </div>
+        
+        <button onclick="generateQR()">BUAT QR CODE</button>
+        <button class="secondary" onclick="downloadQR()" id="downloadBtn" style="display: none;">📥 DOWNLOAD PNG</button>
+      </div>
+    </div>
+    
+    <!-- History Tab Content -->
+    <div id="historyTab" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>📜</span> HISTORY QR CODE
+        </div>
+        <div id="historyList" class="history-list">
+          <!-- History akan diisi oleh JavaScript -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- About Tab Content -->
+    <div id="aboutTab" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>ℹ️</span> TENTANG APLIKASI
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+          <div style="font-size: 60px; margin-bottom: 15px;">📱</div>
+          <h3 style="color: #2af598; margin-bottom: 5px;">QR STUDIO PREMIUM</h3>
+          <p style="color: #8fbfb3;">Versi 7.0.0</p>
+        </div>
+        
+        <div style="background: #0f1f1b; border-radius: 20px; padding: 20px; margin: 20px 0;">
+          <p style="margin-bottom: 10px;"><strong>📅 Tanggal:</strong> <span id="currentDate"></span></p>
+          <p style="margin-bottom: 10px;"><strong>👨‍💻 Developer:</strong> Sammy</p>
+          <p><strong>🔐 Key:</strong> [RAHASIA]</p>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <h4 style="color: #2af598; margin-bottom: 15px;">✨ FITUR LENGKAP:</h4>
+          <ul style="list-style: none; padding: 0;">
+            <li style="padding: 10px; border-bottom: 1px solid #1f463b;">✓ Generate QR Code (Teks, URL, WiFi, Kontak)</li>
+            <li style="padding: 10px; border-bottom: 1px solid #1f463b;">✓ WiFi dengan berbagai tipe keamanan</li>
+            <li style="padding: 10px; border-bottom: 1px solid #1f463b;">✓ Kontak vCard</li>
+            <li style="padding: 10px;">✓ History QR tersimpan</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchMainTab('generate', this)">
+        <span>🏠</span>
+        <span>Home</span>
+      </div>
+      <div class="nav-item" onclick="switchMainTab('history', this)">
+        <span>📜</span>
+        <span>History</span>
+      </div>
+      <div class="nav-item" onclick="switchMainTab('about', this)">
+        <span>ℹ️</span>
+        <span>About</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== KONFIGURASI ====================
+const MASTER_KEY = "SAMZZ";  // KEY PREMIUM
+let currentTab = 'text';
+let currentQRData = null;
+let currentQRType = '';
+let qr = null;
+
+// History storage
+let history = JSON.parse(localStorage.getItem('qrHistory')) || [];
+
+// ==================== FUNGSI AKTIVASI ====================
+function checkKey() {
+  const keyInput = document.getElementById('keyInput');
+  const keyMsg = document.getElementById('keyMsg');
+  const key = keyInput.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  
+  if (key === MASTER_KEY) {
+    // Aktivasi berhasil
+    document.getElementById('activation').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    
+    // Set tanggal di about
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+    
+    // Inisialisasi
+    init();
+    showToast('✅ AKTIVASI BERHASIL!', 'success');
+  } else {
+    // Key salah
+    keyMsg.textContent = '❌ Key salah!';
+    keyInput.value = '';
+    keyInput.focus();
+    showToast('❌ Key tidak valid!', 'error');
+  }
+}
+
+// ==================== FUNGSI NAVIGASI UTAMA ====================
+function switchMainTab(tab, element) {
+  // Update tab aktif
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
+  element.classList.add('active');
+  
+  // Sembunyikan semua tab content
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  
+  // Tampilkan tab yang dipilih
+  if (tab === 'generate') {
+    document.getElementById('generateTab').classList.add('active');
+  } else if (tab === 'history') {
+    document.getElementById('historyTab').classList.add('active');
+    displayHistory();
+  } else if (tab === 'about') {
+    document.getElementById('aboutTab').classList.add('active');
+  }
+}
+
+// ==================== FUNGSI NAVIGASI CONTENT ====================
+function switchContentTab(tab, element) {
+  // Update tab aktif
+  document.querySelectorAll('.tabs')[1].querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  element.classList.add('active');
+  
+  currentTab = tab;
+  
+  // Update title
+  const titles = {
+    'text': { icon: '📝', text: 'QR UNTUK TEKS' },
+    'url': { icon: '🌐', text: 'QR UNTUK URL' },
+    'wifi': { icon: '📶', text: 'QR UNTUK WIFI' },
+    'kontak': { icon: '👤', text: 'QR UNTUK KONTAK' }
+  };
+  
+  document.getElementById('contentTitle').innerHTML = `
+    <span>${titles[tab].icon}</span> ${titles[tab].text}
+  `;
+  
+  // Tampilkan input sesuai tab
+  displayInputForm(tab);
+}
+
+// ==================== FUNGSI DISPLAY INPUT FORM ====================
+function displayInputForm(tab) {
+  const inputArea = document.getElementById('inputArea');
+  
+  if (tab === 'text') {
+    inputArea.innerHTML = `
+      <textarea id="textInput" placeholder="Ketik teks apa saja yang ingin dijadikan QR Code..."></textarea>
+    `;
+  } else if (tab === 'url') {
+    inputArea.innerHTML = `
+      <input type="url" id="urlInput" placeholder="https://example.com">
+      <p style="color: #8fbfb3; font-size: 12px; margin-top: -10px;">Contoh: https://google.com</p>
+    `;
+  } else if (tab === 'wifi') {
+    inputArea.innerHTML = `
+      <input type="text" id="wifiSsid" placeholder="Nama WiFi (SSID)">
+      <select id="wifiSecurity">
+        <option value="WPA">WPA2-PSK (AES) - Recommended</option>
+        <option value="WPA">WPA/WPA2 Mixed</option>
+        <option value="WPA3">WPA3</option>
+        <option value="WEP">WEP</option>
+        <option value="nopass">Open (No Password)</option>
+      </select>
+      <input type="password" id="wifiPassword" placeholder="Password WiFi">
+      <label class="checkbox-label">
+        <input type="checkbox" id="wifiHidden"> Hidden SSID (WiFi tersembunyi)
+      </label>
+    `;
+    
+    // Load saved WiFi
+    document.getElementById('wifiSsid').value = localStorage.getItem('wifi_ssid') || '';
+    document.getElementById('wifiPassword').value = localStorage.getItem('wifi_pass') || '';
+    document.getElementById('wifiSecurity').value = localStorage.getItem('wifi_sec') || 'WPA';
+    
+  } else if (tab === 'kontak') {
+    inputArea.innerHTML = `
+      <input type="text" id="kontakNama" placeholder="Nama Lengkap">
+      <input type="tel" id="kontakTelp" placeholder="Nomor Telepon">
+      <input type="email" id="kontakEmail" placeholder="Email">
+      <input type="text" id="kontakOrg" placeholder="Perusahaan (opsional)">
+    `;
+  }
+}
+
+// ==================== FUNGSI GENERATE QR ====================
+function generateQR() {
+  let data = '';
+  
+  if (currentTab === 'text') {
+    const text = document.getElementById('textInput')?.value.trim();
+    if (!text) {
+      showToast('❌ Teks tidak boleh kosong!', 'error');
+      return;
+    }
+    data = text;
+    currentQRType = 'Teks';
+    
+  } else if (currentTab === 'url') {
+    let url = document.getElementById('urlInput')?.value.trim();
+    if (!url) {
+      showToast('❌ URL tidak boleh kosong!', 'error');
+      return;
+    }
+    if (!url.startsWith('http')) {
+      url = 'https://' + url;
+    }
+    data = url;
+    currentQRType = 'URL';
+    
+  } else if (currentTab === 'wifi') {
+    const ssid = document.getElementById('wifiSsid')?.value.trim();
+    if (!ssid) {
+      showToast('❌ Nama WiFi harus diisi!', 'error');
+      return;
+    }
+    
+    const security = document.getElementById('wifiSecurity')?.value;
+    const password = document.getElementById('wifiPassword')?.value.trim() || '';
+    const hidden = document.getElementById('wifiHidden')?.checked || false;
+    
+    if (security !== 'nopass' && !password) {
+      showToast('❌ Password harus diisi untuk keamanan ini!', 'error');
+      return;
+    }
+    
+    // Save WiFi
+    localStorage.setItem('wifi_ssid', ssid);
+    localStorage.setItem('wifi_pass', password);
+    localStorage.setItem('wifi_sec', security);
+    
+    data = `WIFI:S:${ssid};T:${security};P:${password};${hidden ? 'H:true;' : ''};`;
+    currentQRType = 'WiFi';
+    
+  } else if (currentTab === 'kontak') {
+    const nama = document.getElementById('kontakNama')?.value.trim();
+    if (!nama) {
+      showToast('❌ Nama harus diisi!', 'error');
+      return;
+    }
+    
+    const telp = document.getElementById('kontakTelp')?.value.trim() || '';
+    const email = document.getElementById('kontakEmail')?.value.trim() || '';
+    const org = document.getElementById('kontakOrg')?.value.trim() || '';
+    
+    let vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${nama}`;
+    if (telp) vcard += `\nTEL:${telp}`;
+    if (email) vcard += `\nEMAIL:${email}`;
+    if (org) vcard += `\nORG:${org}`;
+    vcard += `\nEND:VCARD`;
+    
+    data = vcard;
+    currentQRType = 'Kontak';
+  }
+  
+  if (data) {
+    showToast('⏳ Membuat QR Code...', 'success');
+    
+    // Clear QR container
+    document.getElementById('qrcode').innerHTML = '';
+    
+    // Generate QR
+    setTimeout(() => {
+      try {
+        qr = new QRCode(document.getElementById('qrcode'), {
+          text: data,
+          width: 220,
+          height: 220,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        // Simpan data untuk download
+        setTimeout(() => {
+          const img = document.querySelector('#qrcode img');
+          if (img) {
+            currentQRData = img.src;
+            document.getElementById('downloadBtn').style.display = 'block';
+            
+            // Simpan ke history
+            saveToHistory(currentQRType, data);
+          }
+        }, 200);
+        
+        showToast('✅ QR Code berhasil dibuat!', 'success');
+      } catch (e) {
+        showToast('❌ Gagal membuat QR Code!', 'error');
+      }
+    }, 500);
+  }
+}
+
+// ==================== FUNGSI DOWNLOAD ====================
+function downloadQR() {
+  if (!currentQRData) return;
+  
+  const link = document.createElement('a');
+  link.download = `QR_${currentQRType}_${Date.now()}.png`;
+  link.href = currentQRData;
+  link.click();
+  
+  showToast('✅ QR Code didownload!', 'success');
+}
+
+// ==================== FUNGSI HISTORY ====================
+function saveToHistory(type, data) {
+  const timestamp = new Date().toLocaleString('id-ID');
+  const preview = data.substring(0, 30) + (data.length > 30 ? '...' : '');
+  
+  const historyItem = {
+    type: type,
+    data: data,
+    timestamp: timestamp,
+    preview: preview
+  };
+  
+  history.unshift(historyItem);
+  if (history.length > 20) history.pop();
+  
+  localStorage.setItem('qrHistory', JSON.stringify(history));
+}
+
+function displayHistory() {
+  const historyList = document.getElementById('historyList');
+  
+  if (history.length === 0) {
+    historyList.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #8fbfb3;">
+        📭 Belum ada QR Code yang dibuat
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  history.forEach((item, index) => {
+    const icon = item.type === 'Teks' ? '📝' : 
+                 item.type === 'URL' ? '🌐' : 
+                 item.type === 'WiFi' ? '📶' : '👤';
+    
+    html += `
+      <div class="history-item" onclick="loadFromHistory(${index})">
+        <div class="history-icon">${icon}</div>
+        <div class="history-info">
+          <h4>${item.type} - ${item.timestamp}</h4>
+          <p>${item.preview}</p>
+        </div>
+      </div>
+    `;
+  });
+  
+  historyList.innerHTML = html;
+}
+
+function loadFromHistory(index) {
+  const item = history[index];
+  if (!item) return;
+  
+  // Pindah ke generate tab
+  switchMainTab('generate', document.querySelectorAll('.bottom-nav .nav-item')[0]);
+  
+  // Tampilkan QR
+  setTimeout(() => {
+    document.getElementById('qrcode').innerHTML = '';
+    qr = new QRCode(document.getElementById('qrcode'), {
+      text: item.data,
+      width: 220,
+      height: 220
+    });
+    
+    setTimeout(() => {
+      const img = document.querySelector('#qrcode img');
+      if (img) {
+        currentQRData = img.src;
+        currentQRType = item.type;
+        document.getElementById('downloadBtn').style.display = 'block';
+      }
+    }, 200);
+    
+    showToast('✅ History dimuat!', 'success');
+  }, 100);
+}
+
+// ==================== FUNGSI TOAST ====================
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast show ${type}`;
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// ==================== FUNGSI INIT ====================
+function init() {
+  // Set default tab
+  displayInputForm('text');
+  
+  // Set tanggal
+  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
+}
+
+// ==================== EVENT LISTENERS ====================
+document.addEventListener('DOMContentLoaded', function() {
+  // Cek apakah sudah teraktivasi sebelumnya
+  // Untuk keamanan, kita tetap minta key setiap buka
+  // Tapi bisa di-uncomment jika ingin auto-login
+  
+  /*
+  if (localStorage.getItem('qr_premium') === 'true') {
+    document.getElementById('activation').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    init();
+  }
+  */
+  
+  // Enter key on activation
+  document.getElementById('keyInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') checkKey();
+  });
+});
+</script>
+
+</body>
+</html>
